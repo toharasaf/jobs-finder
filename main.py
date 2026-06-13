@@ -19,6 +19,9 @@ from scrapers.xsight_scraper import XsightScraper
 from scrapers.qualcomm_scraper import QualcommScraper
 from scrapers.elbit_scraper import ElbitScraper
 from scrapers.wix_scraper import WixScraper
+from scrapers.arm_scraper import ArmScraper
+from scrapers.ceva_scraper import CevaScraper
+from scrapers.sandisk_scraper import SanDiskScraper
 
 def main():
     print("Starting Job Scraper Bot...")
@@ -40,6 +43,7 @@ def main():
         WorkdayScraper(tenant="intel", site="External", company="Intel"),
         WorkdayScraper(tenant="marvell", site="MarvellCareers", company="Marvell"),
         WorkdayScraper(tenant="cadence", site="External_Careers", company="Cadence"),
+        WorkdayScraper(tenant="broadcom", site="External_Career", company="Broadcom", location_facets=["2314daa817fc016cb4c254532e010de8"]),
         MobileyeScraper(),
         OracleScraper(
             api_url="https://iawmqy.fa.ocs.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions?onlyData=true&expand=all&finder=findReqs;siteNumber=CX_1",
@@ -58,6 +62,9 @@ def main():
         QualcommScraper(),
         ElbitScraper(),
         WixScraper(),
+        ArmScraper(),
+        CevaScraper(),
+        SanDiskScraper(),
     ]
     
     # Polling loop (runs every 15 minutes)
@@ -82,6 +89,15 @@ def main():
                 evaluation = ai.evaluate_job(job.title, job.description)
                 print(f"AI Evaluation: {evaluation}")
                 
+                # FALLBACK: If AI hits the 20-request daily quota, don't throw the job away. 
+                # Since it passed the basic 'Student' filter, send it anyway!
+                if evaluation.get("Error") and "429" in evaluation.get("Reason", ""):
+                    print("AI Quota hit! Sending job to Telegram as a fallback without AI filter...")
+                    evaluation = {
+                        "Match": True, 
+                        "Reason": "⚠️ ה-AI מיצה את 20 הבקשות היומיות שלו של גוגל. המשרה נשלחת אלייך על בסיס סינון מילות מפתח (סטודנט) כדי שלא תפספס אותה!"
+                    }
+                
                 # 6. Send notification if it's a match
                 if evaluation.get("Match"):
                     message = (
@@ -93,11 +109,8 @@ def main():
                     )
                     send_telegram_message(message)
                 
-                # 7. Mark as seen in DB so we don't process it again (unless AI failed)
-                if evaluation.get("Error"):
-                    print("Skipping DB save due to AI error (will retry next scan).")
-                else:
-                    db.add_job(job.id)
+                # 7. Mark as seen in DB so we don't process it again
+                db.add_job(job.id)
                 
                 # Sleep briefly between AI calls to avoid hitting rate limits too fast
                 time.sleep(5)

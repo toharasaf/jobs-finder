@@ -4,13 +4,23 @@ An intelligent, fully automated Job Scraping Bot that monitors top tech companie
 
 ## 🌟 Features
 * **Multi-Platform Scraping:** Built with an Object-Oriented architecture using a `BaseScraper` interface. Currently supports custom integrations for:
-  * **Workday API** (Intel, Marvell, Cadence)
+  * **Workday API** (Intel, Marvell, Cadence, Broadcom)
   * **Oracle Cloud HCM** (Nova, Rafael)
   * **Lever API** (Mobileye)
-  * **Amazon Jobs API**
+  * **SmartRecruiters API** (SanDisk)
+  * **Custom/TalentBrew HTML** (Arm, Ceva, Amazon)
 * **AI Evaluation Pipeline:** Uses Google Gemini 2.5 Flash to read job descriptions and compare them against a specific candidate's CV to determine a perfect match.
 * **Smart Caching:** Implements SQLite database to cache seen jobs, preventing duplicate notifications and saving API quotas.
 * **Real-time Notifications:** Sends instant alerts via Telegram Bot API with formatted markdown, job summaries, and direct application links.
+
+## 📸 Demo (Proof of Work)
+> *Replace these placeholders with your actual screenshots before pushing to GitHub!*
+
+**Terminal Execution:**
+![Terminal Demo](assets/terminal.png)
+
+**Telegram Push Notifications:**
+![Telegram Demo](assets/telegram.png)
 
 ## 🏗 Architecture
 1. **`main.py`**: The central orchestrator that manages the polling loop (every 15 minutes).
@@ -21,6 +31,21 @@ An intelligent, fully automated Job Scraping Bot that monitors top tech companie
 6. **`telegram_notifier.py`**: Handles asynchronous messaging to the Telegram client.
 
 ## 🚀 How It Works
+
+```mermaid
+graph TD
+    A[🕒 Timer every 15 mins] --> B(Scrapers fetch APIs)
+    B --> C{In jobs.db?}
+    C -- Yes --> E[Skip]
+    C -- No --> D[🤖 Gemini AI Evaluation]
+    D --> F{Is it a Match?}
+    F -- Yes --> G[📱 Telegram Notification]
+    F -- No --> H[Skip]
+    G --> I[(Save to jobs.db)]
+    H --> I
+    E -.-> B
+```
+
 1. Scrapers hit the respective APIs and return a list of currently open positions.
 2. The orchestrator checks `jobs.db`. If a job ID exists, it is skipped.
 3. If new, the job description and title are sent to the Gemini AI alongside the candidate's CV.
