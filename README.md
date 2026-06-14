@@ -21,7 +21,7 @@ An intelligent, fully automated Job Scraping Bot that monitors top tech companie
 
 | 🤖 Our Bot (11:24) | 🟢 The Fastest WhatsApp Group (13:07) |
 | :---: | :---: |
-| <img src="assets/bot_amazon.jpg" width="350"> | <img src="assets/whatsapp_amazon.jpg" width="350"> |
+| <img src="assets/bot_amazon.jpg" style="max-width:100%; height:auto;"> | <img src="assets/whatsapp_amazon.jpg" style="max-width:100%; height:auto;"> |
 
 ## 🏗 Architecture
 1. **`main.py`**: The central orchestrator that manages the polling loop (every 15 minutes).
