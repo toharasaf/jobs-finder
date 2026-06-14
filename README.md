@@ -19,11 +19,9 @@ An intelligent, fully automated Job Scraping Bot that monitors top tech companie
 > On the right/bottom, you can see the fastest, most popular WhatsApp job group ("Referally") posting the *exact same job* at **13:07**!
 > **Conclusion:** Our bot caught the job and notified the candidate almost two full hours before the rest of the market even knew it existed.
 
-**Our Bot (11:24):**
-![Bot Notification](assets/bot_amazon.jpg)
-
-**The Fastest WhatsApp Group (13:07):**
-![WhatsApp Group](assets/whatsapp_amazon.jpg)
+| 🤖 Our Bot (11:24) | 🟢 The Fastest WhatsApp Group (13:07) |
+| :---: | :---: |
+| <img src="assets/bot_amazon.jpg" width="350"> | <img src="assets/whatsapp_amazon.jpg" width="350"> |
 
 ## 🏗 Architecture
 1. **`main.py`**: The central orchestrator that manages the polling loop (every 15 minutes).
