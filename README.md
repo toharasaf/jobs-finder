@@ -17,13 +17,9 @@ An intelligent, fully automated Job Scraping Bot that monitors top tech companie
 > **Beating the market by almost 2 hours! 🚀**
 > The images below demonstrate the true power of this bot. On the left/top, you can see our automated bot identifying and pushing the Amazon "System Software Student" job directly to Telegram at **11:24**. 
 > On the right/bottom, you can see the fastest, most popular WhatsApp job group ("Referally") posting the *exact same job* at **13:07**!
-> **Conclusion:** Our bot caught the job and notified the candidate almost two full hours before the rest of the market even knew it existed.
-
-**🤖 Our Bot (11:24):**<br>
-<img src="assets/bot_amazon.jpg" width="450">
-
-**🟢 The Fastest WhatsApp Group (13:07):**<br>
-<img src="assets/whatsapp_amazon.jpg" width="450">
+| 🤖 Our Bot (11:24) | 🟢 The Fastest WhatsApp Group (13:07) |
+| :---: | :---: |
+| <img src="assets/bot_amazon.jpg" width="350"> | <img src="assets/whatsapp_amazon.jpg" width="350"> |
 
 ## 🏗 Architecture
 1. **`main.py`**: The central orchestrator that manages the polling loop (every 15 minutes).
