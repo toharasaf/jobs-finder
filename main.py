@@ -90,24 +90,57 @@ def main():
                 print(f"AI Evaluation: {evaluation}")
                 
                 # FALLBACK: If AI hits the 20-request daily quota, don't throw the job away. 
-                # Since it passed the basic 'Student' filter, send it anyway!
                 if evaluation.get("Error") and "429" in evaluation.get("Reason", ""):
                     print("AI Quota hit! Sending job to Telegram as a fallback without AI filter...")
                     evaluation = {
-                        "Match": True, 
-                        "Reason": "⚠️ ה-AI מיצה את 20 הבקשות היומיות שלו של גוגל. המשרה נשלחת אלייך על בסיס סינון מילות מפתח (סטודנט) כדי שלא תפספס אותה!"
+                        "IsRelevantDomain": True,
+                        "MatchPercentage": 100, 
+                        "Reason": "⚠️ ה-AI מיצה את 20 הבקשות היומיות שלו של גוגל. המשרה נשלחת אלייך על בסיס סינון מילות מפתח (סטודנט) כדי שלא תפספס אותה!",
+                        "TailoredCV": ""
                     }
                 
-                # 6. Send notification if it's a match
-                if evaluation.get("Match"):
+                # 6. Send notification if it is a relevant domain
+                if evaluation.get("IsRelevantDomain"):
+                    match_pct = evaluation.get("MatchPercentage", 0)
+                    reason = evaluation.get("Reason", "")
+                    tailored_cv = evaluation.get("TailoredCV", "")
+                    
+                    # Choose emoji based on score
+                    emoji = "🎯" if match_pct >= 80 else "⚠️"
+                    
                     message = (
-                        f"🎯 *התאמת משרה חדשה!*\n\n"
+                        f"{emoji} *משרה רלוונטית חדשה! (התאמה: {match_pct}%)*\n\n"
                         f"🔹 *תפקיד:* {job.title}\n"
                         f"🏢 *חברה:* {job.company}\n"
-                        f"💡 *למה זה מתאים?* {evaluation.get('Reason')}\n\n"
+                        f"💡 *ניתוח ה-AI:* {reason}\n\n"
                         f"🔗 [קישור למשרה]({job.url})"
                     )
-                    send_telegram_message(message)
+                    
+                    if tailored_cv:
+                        # Write tailored CV to PDF file
+                        cv_filename = "Tohar_Asaf_CV.pdf"
+                        import os
+                        from pdf_generator import create_cv_pdf
+                        
+                        pdf_success = create_cv_pdf(tailored_cv, cv_filename)
+                        
+                        if pdf_success:
+                            # Send the PDF document with the message as caption
+                            from telegram_notifier import send_telegram_document
+                            send_telegram_document(cv_filename, caption=message)
+                            
+                            # Clean up the temp file
+                            try:
+                                os.remove(cv_filename)
+                            except:
+                                pass
+                        else:
+                            # Fallback to standard message if PDF generation fails
+                            from telegram_notifier import send_telegram_message
+                            send_telegram_message(message)
+                    else:
+                        from telegram_notifier import send_telegram_message
+                        send_telegram_message(message)
                 
                 # 7. Mark as seen in DB so we don't process it again
                 db.add_job(job.id)

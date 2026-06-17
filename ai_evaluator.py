@@ -33,8 +33,14 @@ class AIEvaluator:
             print("CV text is empty. Skipping AI evaluation.")
             return {"Match": False, "Reason": "CV missing"}
 
+        import datetime
+        current_date = datetime.datetime.now().strftime("%B %Y")
+        
         prompt = f"""
-        You are an expert technical recruiter. I am looking for a student job that fits my CV.
+        You are an expert technical recruiter and ATS Optimizer. I am looking for a student job that fits my CV.
+        
+        IMPORTANT CONTEXT: 
+        Today's date is {current_date}. Keep this in mind when calculating my years of study or experience based on the dates in my CV.
         
         My CV:
         {self.cv_text}
@@ -44,12 +50,16 @@ class AIEvaluator:
         {job_description}
         
         Please evaluate this job based on two criteria:
-        1. Is it a student job? (It MUST be a student position, intern, or explicitly mention part-time/student suitability).
-        2. Does it technically match the skills and experience in my CV?
+        1. Is it a relevant student job? (It MUST be a student position, intern, or part-time in Electrical Engineering, Computer Engineering, or Software). If it is for Industrial Engineering, HR, or non-engineering, it is NOT relevant.
+        2. ATS Match Percentage: Grade my CV against the job requirements from 0 to 100.
         
-        Return your answer ONLY as a valid JSON object with two fields:
-        - "Match": true if both criteria are met, false otherwise.
-        - "Reason": A short sentence in Hebrew explaining why it is a match or why it was rejected.
+        Additionally, you must rewrite my CV to perfectly tailor it to this job's keywords and requirements to pass an ATS scan. Do NOT lie or invent experience I don't have, but DO change the phrasing of my existing experience to match the exact terms used in the Job Description.
+
+        Return your answer ONLY as a valid JSON object with the following fields:
+        - "IsRelevantDomain": true if it is a relevant engineering student job, false otherwise.
+        - "MatchPercentage": an integer between 0 and 100 representing how well my original CV matches the requirements.
+        - "Reason": A short sentence in Hebrew explaining the match percentage, what I'm missing, or why I was rejected.
+        - "TailoredCV": A string containing my full, rewritten, and ATS-optimized CV in English.
         """
         
         try:
@@ -66,11 +76,11 @@ class AIEvaluator:
             result = json.loads(result_text)
             
             # Ensure required keys exist
-            if "Match" not in result or "Reason" not in result:
-                return {"Match": False, "Reason": "Invalid AI response structure"}
+            if not all(key in result for key in ["IsRelevantDomain", "MatchPercentage", "Reason", "TailoredCV"]):
+                return {"IsRelevantDomain": False, "MatchPercentage": 0, "Reason": "Invalid AI response structure"}
                 
             return result
             
         except Exception as e:
             print(f"Error during AI evaluation: {e}")
-            return {"Match": False, "Reason": f"Error: {str(e)}", "Error": True}
+            return {"IsRelevantDomain": False, "MatchPercentage": 0, "Reason": f"Error: {str(e)}", "Error": True}
